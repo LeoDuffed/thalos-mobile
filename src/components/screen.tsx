@@ -1,6 +1,6 @@
+import { router, usePathname } from 'expo-router';
 import type { PropsWithChildren } from 'react';
 import { Image, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
-import { router, usePathname } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { font, palette } from '@/constants/design';
@@ -24,12 +24,10 @@ export function Screen({ children }: PropsWithChildren) {
             onPress={() => router.navigate('/')} style={({ pressed }) => pressed && styles.pressed}>
             <Brand />
           </Pressable>
-          <View style={styles.mobileBadge}><Text style={styles.mobileText}>MOBILE / 01</Text></View>
         </View>
         <ScrollView style={styles.scroll} contentContainerStyle={styles.content}
           showsVerticalScrollIndicator={false}>
           {children}
-          <View style={styles.footer}><View style={styles.dot} /><Text style={styles.footerText}>THALOS · PROTOTIPO EN DESARROLLO</Text></View>
         </ScrollView>
         <View style={styles.navigation} accessibilityRole="tablist">
           <NavItem href="/" active={!dashboard} label="Inicio" icon="home" />

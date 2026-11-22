@@ -9,7 +9,6 @@ import { font, palette } from '@/constants/design';
 export default function HomeScreen() {
   return <Screen>
     <View style={styles.hero}>
-      <View style={styles.eyebrowRow}><View style={styles.dot} /><Text style={styles.eyebrow}>ROBÓTICA. PERCEPCIÓN. CONEXIÓN.</Text></View>
       <Text accessibilityRole="header" style={styles.title}>Tu robot.{'\n'}Otra perspectiva.</Text>
       <Text style={styles.description}>El centro de control de Thalos, ahora en tus manos.</Text>
     </View>
@@ -19,7 +18,6 @@ export default function HomeScreen() {
           style={({ pressed }) => [styles.button, pressed && styles.pressed]}>
           <Text style={styles.buttonText}>Abrir centro de control</Text><Icon name="arrow" color="white" size={21} />
         </Pressable>
-      <Text style={styles.actionNote}>Lecturas del robot a través de Firebase</Text>
     </View>
     <View style={styles.overview}>
       <Text style={styles.sectionLabel}>UNA VISTA. TODO EL CONTEXTO.</Text>

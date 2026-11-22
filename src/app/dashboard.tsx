@@ -30,14 +30,10 @@ export default function DashboardScreen() {
   return <Screen>
     <View style={styles.heading}>
       <View style={styles.topline}>
-        <Text style={styles.eyebrow}>{telemetry.deviceId.toUpperCase()} / PANEL</Text>
+        <Text style={styles.eyebrow}>{telemetry.deviceId.toUpperCase()} / DASHBOARD</Text>
         <View style={styles.badge}><View style={[styles.dot, current && styles.liveDot]} /><Text style={styles.badgeText}>{badge}</Text></View>
       </View>
       <Text accessibilityRole="header" style={styles.title}>Centro de{'\n'}control.</Text>
-      <Text style={styles.description}>Una vista del robot y su entorno.</Text>
-    </View>
-    <View style={styles.notice} accessibilityLiveRegion="polite">
-      <Icon name="signal" size={18} color={palette.muted} /><Text style={styles.noticeText}>{notice}</Text>
     </View>
     {(error || (loaded && !connected)) && <Pressable accessibilityRole="button" onPress={retry}
       style={({ pressed }) => [styles.retry, pressed && styles.pressed]}>
@@ -51,14 +47,6 @@ export default function DashboardScreen() {
     </View>
     {valid && !current && <Text style={styles.latest}>Última medición: {formatTime(reading.updatedAt)} · {ageLabel(reading.updatedAt, now)}</Text>}
     <View style={styles.section}>
-      <View style={styles.sectionHead}><Text accessibilityRole="header" style={styles.sectionTitle}>Estado del sistema</Text><Text style={styles.smallLabel}>CONEXIONES</Text></View>
-      <View style={styles.connections}>
-        <Connection icon="cloud" title="Base de datos" detail="Firebase" online={connected && loaded && !error} state={error ? 'Error' : connected && loaded ? 'Conectada' : loaded ? 'Sin conexión' : 'Conectando'} />
-        <Connection icon="chip" title="Controlador" detail={status.wifiRssiDbm === null ? 'ESP32' : `ESP32 · ${status.wifiRssiDbm} dBm`} online={espOnline} state={espOnline ? 'En línea' : status.lastSeenAt ? 'Sin señal reciente' : 'Sin reporte'} />
-        <Connection icon="radar" title="Radar" detail="HLK-LD2450" online={sensorOnline} state={sensorOnline ? 'Lectura vigente' : valid ? 'Lectura antigua' : 'Sin lecturas'} last />
-      </View>
-    </View>
-    <View style={styles.section}>
       <View style={styles.sectionHead}><Text accessibilityRole="header" style={styles.sectionTitle}>Objetivos detectados</Text>{valid && <Text style={styles.smallLabel}>{current ? 'LECTURA VIGENTE' : 'ÚLTIMA LECTURA'}</Text>}</View>
       {targets.length ? targets.map(target => <TargetCard key={target.slot} target={target}
         selected={selected?.slot === target.slot} current={current} onSelect={() => setSelectedSlot(target.slot)} />)
@@ -67,7 +55,6 @@ export default function DashboardScreen() {
           <Text style={styles.emptyTitle}>{valid ? current ? 'Sin objetivos en esta lectura' : 'Última lectura sin objetivos' : 'Aún no hay lecturas válidas'}</Text>
           <Text style={styles.emptyText}>{valid ? 'El radar reportó una trama válida sin objetivos activos.' : 'Aquí aparecerán la posición, la distancia y la velocidad de cada objetivo.'}</Text>
         </View>}
-      {targets.length > 0 && <Text style={styles.slotNote}>T1–T3 son ranuras de seguimiento del radar, no identifican personas. Los objetivos fuera de la escala se conservan en estas tarjetas.</Text>}
     </View>
     <View style={styles.timestamp}><Text style={styles.timestampText}>Última actualización del radar</Text><Text style={styles.timestampValue}>{valid ? formatTime(reading.updatedAt) : '—'}</Text></View>
     {valid && <Text style={styles.latest}>{ageLabel(reading.updatedAt, now)} · Reporte #{reading.sequence}</Text>}

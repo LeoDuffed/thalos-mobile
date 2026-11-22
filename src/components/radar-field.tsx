@@ -1,6 +1,6 @@
+import { useId } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import Svg, { Circle, ClipPath, Defs, G, Line, Path, Rect, Text as SvgText } from 'react-native-svg';
-import { useId } from 'react';
 
 import { font } from '@/constants/design';
 import { targetColors } from '@/constants/radar';
@@ -25,7 +25,7 @@ export function RadarField({ compact = false, targets = [], current = false, has
   return (
     <View style={styles.card}>
       <View style={styles.heading}>
-        <View style={styles.titleRow}><View style={styles.indicator} /><Text style={styles.eyebrow}>{compact ? 'PERCEPCIÓN DEL ENTORNO' : 'CAMPO DE DETECCIÓN'}</Text></View>
+        <View style={styles.titleRow}><View style={styles.indicator} /><Text style={styles.eyebrow}>{compact ? 'RADAR' : 'CAMPO DE DETECCIÓN'}</Text></View>
         <Text style={styles.reference}>{compact ? '01' : 'VISTA SUPERIOR'}</Text>
       </View>
       <View style={[styles.drawing, compact && styles.compactDrawing]} accessible accessibilityLabel={compact ? "Campo de referencia del radar, sin mediciones." : `Radar en vista espejo. ${stateLabel}. ${visible.length} objetivos en escala y ${outside} fuera de escala.`}>
@@ -62,7 +62,7 @@ export function RadarField({ compact = false, targets = [], current = false, has
         </Svg>
       </View>
       <View style={styles.caption}>
-        <Text style={styles.captionText}>{compact ? 'Una perspectiva sin cámaras.' : 'Referencia: 6 m · ±60°'}</Text>
+        <Text style={styles.captionText}>{compact ? '' : 'Referencia: 6 m · ±60°'}</Text>
         <Text style={styles.waiting}>{compact ? 'THALOS' : stateLabel}</Text>
       </View>
       {!compact && outside > 0 && <Text style={styles.outside}>{outside} {outside === 1 ? 'objetivo fuera' : 'objetivos fuera'} de escala. Consulta sus mediciones abajo.</Text>}
