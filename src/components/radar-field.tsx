@@ -18,9 +18,9 @@ function arc(r: number) {
 export function RadarField({ compact = false, targets = [], current = false, hasReading = false, selectedSlot, deviceId = 'robot-01' }: {
   compact?: boolean; targets?: RadarTarget[]; current?: boolean; hasReading?: boolean; selectedSlot?: number; deviceId?: string;
 }) {
-  const visible = targets.filter(targetInView);
-  const outside = targets.length - visible.length;
-  const stateLabel = current ? 'LECTURA VIGENTE' : hasReading ? 'ÚLTIMA LECTURA' : 'SIN LECTURAS';
+  const visible = current ? targets.filter(targetInView) : [];
+  const outside = current ? targets.length - visible.length : 0;
+  const stateLabel = current ? 'LECTURA VIGENTE' : hasReading ? 'SIN LECTURA VIGENTE' : 'SIN LECTURAS';
   const clip = `radar${useId().replace(/[^a-zA-Z0-9]/g, '')}`;
   return (
     <View style={styles.card}>
@@ -47,7 +47,7 @@ export function RadarField({ compact = false, targets = [], current = false, has
             const { x, y } = radarPosition(target);
             const color = targetColors[target.slot - 1];
             const selected = target.slot === selectedSlot;
-            // las lecturas antiguas siguen visibles, pero atenuadas y con su etiqueta
+            // solo dibujamos objetivos mientras la lectura siga vigente
             return <G key={target.slot} opacity={current ? 1 : 0.45}>
               {selected && <Line x1={cx} y1={cy} x2={x} y2={y} stroke={color} strokeOpacity={0.5} strokeDasharray="3 4" />}
               <Circle cx={x} cy={y} r={selected ? 12 : 9} stroke={color} strokeOpacity={0.7} fill={color} fillOpacity={0.12} />

@@ -6,7 +6,7 @@ Aplicación móvil de Thalos con React Native, Expo y TypeScript. Comparte la id
 
 La ESP32 publica las lecturas del robot en Firebase Realtime Database. La app inicia una sesión anónima y escucha las actualizaciones de `telemetry/devices/robot-01/status` y `telemetry/devices/robot-01/sensors/ld2450`. No escribe mediciones ni usa la cuenta de la ESP32.
 
-El centro de control muestra el radar en espejo, los objetivos, sus coordenadas, distancia, velocidad, ángulo y resolución. Firebase, la ESP32 y el radar tienen indicadores independientes. Una lectura del radar vence a los 5 segundos y el estado de la ESP32 a los 15. Las mediciones guardadas se conservan como última lectura, con su hora y antigüedad; nunca se presentan como actuales al perder la conexión. La ausencia de datos se muestra con «—» y solo un reporte válido sin objetivos muestra cero.
+El centro de control muestra el radar en espejo, los objetivos, sus coordenadas, distancia, velocidad, ángulo y resolución. Firebase, la ESP32 y el radar tienen indicadores independientes. Una lectura del radar vence a los 5 segundos y el estado de la ESP32 a los 15. Al caducar la lectura o perder la conexión, se ocultan los puntos, las tarjetas y las mediciones de los objetivos. Solo se conserva la hora y la antigüedad del último reporte como referencia; la muestra guardada en Firebase no se borra. La ausencia de datos se muestra con «—» y solo un reporte válido sin objetivos muestra cero.
 
 La portada conserva una ilustración del campo del radar sin objetivos. La escala de 6 m y ±60° es una referencia, no una garantía de detección. T1–T3 son ranuras del radar y no identifican personas. Las detecciones fuera de esa escala permanecen en las tarjetas con sus coordenadas originales.
 

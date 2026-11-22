@@ -90,7 +90,8 @@ export function isRecent(time: number | null, now: number, timeout: number) {
 export function getReadingState(reading: RadarReading | null, status: DeviceStatus, now: number, connected: boolean) {
   const espOnline = connected && isRecent(status.lastSeenAt, now, ESP_TIMEOUT_MS);
   const current = espOnline && reading?.valid === true && isRecent(reading.updatedAt, now, SENSOR_TIMEOUT_MS);
-  return { espOnline, current, sensorOnline: current };
+  // ocultamos los objetivos al caducar la lectura, aunque Firebase conserve la muestra
+  return { espOnline, current, sensorOnline: current, targets: current && reading ? reading.targets : [] };
 }
 
 export function targetInView(target: RadarTarget) {

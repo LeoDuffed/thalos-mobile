@@ -15,14 +15,13 @@ export default function DashboardScreen() {
   const [selectedSlot, setSelectedSlot] = useState<number | null>(null);
   // si falta algún dato, dejamos un guion; no lo convertimos en una medición de cero
   const valid = reading?.valid === true;
-  const targets = valid ? reading.targets : [];
+  const { current, espOnline, sensorOnline, targets } = getReadingState(reading, status, now, connected && loaded && !error);
   const selected = targets.find(target => target.slot === selectedSlot) ?? targets[0];
-  const { current, espOnline, sensorOnline } = getReadingState(reading, status, now, connected && loaded && !error);
   const nearest = targets.length ? Math.min(...targets.map(target => target.distanceM)) : null;
   const badge = error ? 'ERROR DE CONEXIÓN' : !loaded ? 'CONECTANDO' : !connected ? 'SIN CONEXIÓN' : current ? 'EN VIVO' : 'SIN LECTURA ACTUAL';
   const notice = error ?? (!loaded ? 'Conectando a Firebase y esperando las lecturas del robot.'
     : reading && !valid ? reading.issue
-    : !connected ? 'Sin conexión a Firebase. Se conserva la última lectura recibida.'
+    : !connected ? 'Sin conexión a Firebase. Los objetivos se ocultan hasta recibir una lectura vigente.'
     : current ? 'Lecturas reales del radar recibidas a través de Firebase.'
     : valid ? 'La última lectura es antigua. Esperando nuevos datos del sensor.'
     : 'Firebase está conectado. Esperando la primera lectura del sensor.');
@@ -39,21 +38,21 @@ export default function DashboardScreen() {
       style={({ pressed }) => [styles.retry, pressed && styles.pressed]}>
       <Text style={styles.retryText}>Reintentar conexión</Text>
     </Pressable>}
-    <RadarField targets={targets} current={current} hasReading={valid} selectedSlot={selected?.slot}
+    <RadarField targets={targets} current={current} hasReading={current} selectedSlot={selected?.slot}
       deviceId={telemetry.deviceId} />
     <View style={styles.metrics}>
-      <Metric title="Objetivos" icon="target" value={valid ? String(targets.length) : '—'} caption={valid ? current ? 'En esta lectura' : 'Última lectura' : 'Sin mediciones'} />
-      <Metric title="Más cercano" icon="radar" value={nearest === null ? '—' : nearest.toFixed(2)} caption={valid && !current ? 'Última lectura' : 'Distancia al sensor'} unit="m" />
+      <Metric title="Objetivos" icon="target" value={current ? String(targets.length) : '—'} caption={current ? 'En esta lectura' : 'Sin lectura vigente'} />
+      <Metric title="Más cercano" icon="radar" value={nearest === null ? '—' : nearest.toFixed(2)} caption={current ? 'Distancia al sensor' : 'Sin lectura vigente'} unit="m" />
     </View>
     {valid && !current && <Text style={styles.latest}>Última medición: {formatTime(reading.updatedAt)} · {ageLabel(reading.updatedAt, now)}</Text>}
     <View style={styles.section}>
-      <View style={styles.sectionHead}><Text accessibilityRole="header" style={styles.sectionTitle}>Objetivos detectados</Text>{valid && <Text style={styles.smallLabel}>{current ? 'LECTURA VIGENTE' : 'ÚLTIMA LECTURA'}</Text>}</View>
+      <View style={styles.sectionHead}><Text accessibilityRole="header" style={styles.sectionTitle}>Objetivos detectados</Text><Text style={styles.smallLabel}>{current ? 'LECTURA VIGENTE' : 'SIN LECTURA VIGENTE'}</Text></View>
       {targets.length ? targets.map(target => <TargetCard key={target.slot} target={target}
         selected={selected?.slot === target.slot} current={current} onSelect={() => setSelectedSlot(target.slot)} />)
         : <View style={styles.empty}>
           <View style={styles.emptyIcon}><Icon name="target" size={26} color={palette.muted} /></View>
-          <Text style={styles.emptyTitle}>{valid ? current ? 'Sin objetivos en esta lectura' : 'Última lectura sin objetivos' : 'Aún no hay lecturas válidas'}</Text>
-          <Text style={styles.emptyText}>{valid ? 'El radar reportó una trama válida sin objetivos activos.' : 'Aquí aparecerán la posición, la distancia y la velocidad de cada objetivo.'}</Text>
+          <Text style={styles.emptyTitle}>{current ? 'Sin objetivos en esta lectura' : 'Sin lecturas vigentes'}</Text>
+          <Text style={styles.emptyText}>{current ? 'El radar reportó una trama válida sin objetivos activos.' : notice}</Text>
         </View>}
     </View>
     <View style={styles.timestamp}><Text style={styles.timestampText}>Última actualización del radar</Text><Text style={styles.timestampValue}>{valid ? formatTime(reading.updatedAt) : '—'}</Text></View>

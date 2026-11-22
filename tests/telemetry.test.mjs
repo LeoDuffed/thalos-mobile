@@ -111,3 +111,24 @@ test('la antigüedad distingue reportes ausentes, actuales y fechas fuera de ran
   assert.equal(ageLabel(now - 2 * 86400_000, now), 'Hace 2 d');
   assert.equal(ageLabel(now + 30_000, now), 'Fecha fuera de rango');
 });
+
+
+test("los objetivos desaparecen al caducar la lectura sin borrar el último reporte", () => {
+  const reading = parseRadarReading(frame());
+  assert.equal(getReadingState(reading, status, now, true).targets.length, 1);
+  for (const state of [
+    getReadingState(reading, status, now + SENSOR_TIMEOUT_MS + 1, true),
+    getReadingState(reading, status, now + 16 * 86400_000, true),
+    getReadingState(reading, status, now, false),
+    getReadingState(reading, parseDeviceStatus(null), now, true),
+    getReadingState(parseRadarReading(frame({ updatedAt: now + 30_000 })), status, now, true),
+  ]) {
+    assert.equal(state.current, false);
+    assert.deepEqual(state.targets, []);
+  }
+  assert.equal(reading.updatedAt, now);
+  assert.equal(reading.targets.length, 1);
+  const empty = getReadingState(parseRadarReading(frame({ targetCount: 0, targets: null })), status, now, true);
+  assert.equal(empty.current, true);
+  assert.deepEqual(empty.targets, []);
+});
