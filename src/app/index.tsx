@@ -19,7 +19,7 @@ export default function HomeScreen() {
           style={({ pressed }) => [styles.button, pressed && styles.pressed]}>
           <Text style={styles.buttonText}>Abrir centro de control</Text><Icon name="arrow" color="white" size={21} />
         </Pressable>
-      <Text style={styles.actionNote}>Explora la interfaz · Sin conexión al sensor</Text>
+      <Text style={styles.actionNote}>Lecturas del robot a través de Firebase</Text>
     </View>
     <View style={styles.overview}>
       <Text style={styles.sectionLabel}>UNA VISTA. TODO EL CONTEXTO.</Text>

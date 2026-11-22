@@ -8,6 +8,7 @@ import { Geist_500Medium } from '@expo-google-fonts/geist/500Medium';
 import { Geist_600SemiBold } from '@expo-google-fonts/geist/600SemiBold';
 import { Geist_700Bold } from '@expo-google-fonts/geist/700Bold';
 
+// dejamos la portada de carga hasta que la tipografía esté lista
 void SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {

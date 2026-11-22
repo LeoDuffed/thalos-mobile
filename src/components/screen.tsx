@@ -13,6 +13,7 @@ export function Brand() {
   </View>;
 }
 
+// compartimos la cabecera, la navegación y los márgenes seguros entre las dos pantallas
 export function Screen({ children }: PropsWithChildren) {
   const dashboard = usePathname() === '/dashboard';
   return (

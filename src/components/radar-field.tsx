@@ -3,6 +3,8 @@ import Svg, { Circle, ClipPath, Defs, G, Line, Path, Rect, Text as SvgText } fro
 import { useId } from 'react';
 
 import { font } from '@/constants/design';
+import { targetColors } from '@/constants/radar';
+import { radarPosition, targetInView, type RadarTarget } from '@/lib/telemetry';
 
 // La escala representa el campo de referencia, no mediciones del sensor.
 const cx = 180;
@@ -13,7 +15,12 @@ function arc(r: number) {
   return `M ${cx - dx} ${cy - r / 2} A ${r} ${r} 0 0 1 ${cx + dx} ${cy - r / 2}`;
 }
 
-export function RadarField({ compact = false }: { compact?: boolean }) {
+export function RadarField({ compact = false, targets = [], current = false, hasReading = false, selectedSlot, deviceId = 'robot-01' }: {
+  compact?: boolean; targets?: RadarTarget[]; current?: boolean; hasReading?: boolean; selectedSlot?: number; deviceId?: string;
+}) {
+  const visible = targets.filter(targetInView);
+  const outside = targets.length - visible.length;
+  const stateLabel = current ? 'LECTURA VIGENTE' : hasReading ? 'ÚLTIMA LECTURA' : 'SIN LECTURAS';
   const clip = `radar${useId().replace(/[^a-zA-Z0-9]/g, '')}`;
   return (
     <View style={styles.card}>
@@ -21,7 +28,7 @@ export function RadarField({ compact = false }: { compact?: boolean }) {
         <View style={styles.titleRow}><View style={styles.indicator} /><Text style={styles.eyebrow}>{compact ? 'PERCEPCIÓN DEL ENTORNO' : 'CAMPO DE DETECCIÓN'}</Text></View>
         <Text style={styles.reference}>{compact ? '01' : 'VISTA SUPERIOR'}</Text>
       </View>
-      <View style={[styles.drawing, compact && styles.compactDrawing]} accessible accessibilityLabel="Campo de referencia vacío del radar. Sin mediciones disponibles.">
+      <View style={[styles.drawing, compact && styles.compactDrawing]} accessible accessibilityLabel={compact ? "Campo de referencia del radar, sin mediciones." : `Radar en vista espejo. ${stateLabel}. ${visible.length} objetivos en escala y ${outside} fuera de escala.`}>
         <Svg width="100%" height="100%" viewBox="0 0 360 280" accessible={false}>
           <Defs><ClipPath id={clip}><Path d={`M ${cx} ${cy} L ${cx - radius * Math.sin(Math.PI / 3)} ${cy - radius / 2} ${arc(radius).replace(/^M [^A]+/, '')} Z`} /></ClipPath></Defs>
           <G clipPath={`url(#${clip})`}>
@@ -36,21 +43,35 @@ export function RadarField({ compact = false }: { compact?: boolean }) {
           {[-60, 0, 60].map(angle => <Line key={angle} x1={cx} y1={cy} x2={cx + radius * Math.sin(angle * Math.PI / 180)} y2={cy - radius * Math.cos(angle * Math.PI / 180)} stroke="#777777" strokeWidth={1} strokeDasharray={angle === 0 ? '3 5' : undefined} />)}
           <SvgText x={180} y={18} fill="#999999" textAnchor="middle" letterSpacing={2} fontSize={8}>FRENTE</SvgText>
           {!compact && <><SvgText x={10} y={153} fill="#AAAAAA" fontSize={9}>+60°</SvgText><SvgText x={324} y={153} fill="#AAAAAA" fontSize={9}>−60°</SvgText></>}
+          {!compact && visible.map(target => {
+            const { x, y } = radarPosition(target);
+            const color = targetColors[target.slot - 1];
+            const selected = target.slot === selectedSlot;
+            // las lecturas antiguas siguen visibles, pero atenuadas y con su etiqueta
+            return <G key={target.slot} opacity={current ? 1 : 0.45}>
+              {selected && <Line x1={cx} y1={cy} x2={x} y2={y} stroke={color} strokeOpacity={0.5} strokeDasharray="3 4" />}
+              <Circle cx={x} cy={y} r={selected ? 12 : 9} stroke={color} strokeOpacity={0.7} fill={color} fillOpacity={0.12} />
+              <Circle cx={x} cy={y} r={3.5} fill={color} />
+              <SvgText x={x > 300 ? x - 18 : x + 15} y={y - 8} fill={color} textAnchor={x > 300 ? 'end' : 'start'} fontSize={11} fontWeight="bold">T{target.slot}</SvgText>
+            </G>;
+          })}
           <Circle cx={cx} cy={cy} r={24} fill="none" stroke="#777777" strokeOpacity={0.25} />
           <Rect x={cx - 13} y={cy - 13} width={26} height={26} rx={7} fill="white" />
           <Path d={`M ${cx - 5} ${cy} h 10 M ${cx} ${cy - 5} v 10`} stroke="#111111" strokeWidth={1.7} />
-          <SvgText x={cx} y={275} fill="#AAAAAA" textAnchor="middle" letterSpacing={1.6} fontSize={8}>SENSOR / ROBOT 01</SvgText>
+          <SvgText x={cx} y={275} fill="#AAAAAA" textAnchor="middle" letterSpacing={1.6} fontSize={8}>{`SENSOR / ${deviceId.replace(/-/g, ' ').toUpperCase()}`}</SvgText>
         </Svg>
       </View>
       <View style={styles.caption}>
         <Text style={styles.captionText}>{compact ? 'Una perspectiva sin cámaras.' : 'Referencia: 6 m · ±60°'}</Text>
-        <Text style={styles.waiting}>{compact ? 'THALOS' : 'SIN LECTURAS'}</Text>
+        <Text style={styles.waiting}>{compact ? 'THALOS' : stateLabel}</Text>
       </View>
+      {!compact && outside > 0 && <Text style={styles.outside}>{outside} {outside === 1 ? 'objetivo fuera' : 'objetivos fuera'} de escala. Consulta sus mediciones abajo.</Text>}
     </View>
   );
 }
 
 const styles = StyleSheet.create({
+  outside: { color: '#BDBDBD', fontFamily: font.regular, fontSize: 10, lineHeight: 16, paddingHorizontal: 16, paddingBottom: 16 },
   card: { backgroundColor: '#111111', borderRadius: 22, overflow: 'hidden' },
   heading: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, justifyContent: 'space-between', alignItems: 'center', padding: 17, borderBottomWidth: 1, borderColor: '#2D2D2D' },
   titleRow: { flexDirection: 'row', alignItems: 'center', gap: 7 },
